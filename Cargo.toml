@@ -1,0 +1,24 @@
+[package]
+name = "dynamic-groth16"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Partial and dynamic Groth16 proving built on arkworks"
+
+[dependencies]
+ark-ec = { version = "0.5", default-features = false }
+ark-ff = { version = "0.5", default-features = false }
+ark-std = { version = "0.5", default-features = false }
+ark-poly = { version = "0.5", default-features = false }
+ark-groth16 = { version = "0.5", default-features = false }
+ark-relations = { version = "0.5", features = ["std"] }
+ark-serialize = { version = "0.5", default-features = false }
+rayon = { version = "1.12", optional = true }
+
+[dev-dependencies]
+ark-bn254 = { version = "0.5", features = ["std"] }
+ark-crypto-primitives = { version = "0.5", default-features = false, features = ["snark"] }
+
+[features]
+default = ["parallel"]
+parallel = ["dep:rayon", "ark-ff/parallel", "ark-ec/parallel", "ark-std/parallel", "ark-poly/parallel", "ark-groth16/parallel", "ark-serialize/parallel"]
