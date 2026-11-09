@@ -1,6 +1,6 @@
 # Dynamic Groth16
 
-A standalone Rust library for dynamic/partial Groth16 proving with arkworks 0.5. This will eventually be integrated into [ZeroKit's](). However, It is still useful for other use-cases beyond RLN, and so this crate does not depend on
+A standalone Rust library for dynamic/partial Groth16 proving with arkworks 0.5. This will eventually be integrated into [ZeroKit's](https://github.com/vacp2p/zerokit). However, It is still useful for other use-cases beyond RLN, and so this crate does not depend on
 ZeroKit, RLN, Circom tools, or any particular witness calculator at runtime.
 
 - **V1** `Groth16DynamicV1` caches the linear contributions of fixed assignment values to the proof. Finishing
