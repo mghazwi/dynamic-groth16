@@ -24,7 +24,7 @@ impl<E: Pairing> PartialProofV2<E> {
     /// Compute the simple linear partial proof, static nonlinear point,
     /// and unified mixed/linear C points.
     /// `assignment` excludes constant one, just like the simple partial API.
-    pub(in crate::dynamic) fn from_circom_assignment(
+    pub(in crate::dynamic) fn from_assignment(
         pk: &ProvingKey<E>,
         matrices: &ConstraintMatrices<E::ScalarField>,
         setup: &DynamicSetup<E>,
@@ -142,26 +142,23 @@ impl<E: Pairing> PartialProofV2<E> {
             }
         }
 
-        // 8. Store the sorted row supports for finishing.
-        let a_rows: Vec<_> = a_support
-            .iter()
-            .enumerate()
-            .filter_map(|(i, &yes)| yes.then_some(i))
-            .collect();
-        let b_rows: Vec<_> = b_support
-            .iter()
-            .enumerate()
-            .filter_map(|(i, &yes)| yes.then_some(i))
-            .collect();
-
+        // 8. return all components of the partial proof
         Ok(Self {
             assignment: assignment.clone(),
             linear,
             static_nonlinear,
             gamma: E::G1::normalize_batch(&gamma),
             dynamic_indices,
-            a_rows,
-            b_rows,
+            a_rows: a_support
+                .iter()
+                .enumerate()
+                .filter_map(|(i, &yes)| yes.then_some(i))
+                .collect(),
+            b_rows: b_support
+                .iter()
+                .enumerate()
+                .filter_map(|(i, &yes)| yes.then_some(i))
+                .collect(),
         })
     }
 
@@ -276,7 +273,9 @@ impl<E: Pairing> PartialProofV2<E> {
             + E::G2::msm_unchecked(&b_points, &dynamic_values)
             + pk.vk.delta_g2 * s;
 
-        // 5. Compute the full-domain convolutions used for A' * B'.
+        // 5. Prepare weights for A'*B':
+        // wbar_a = Wbar ** a'
+        // wbar_b = Wbar ** b'
         let wbar_a = convolve_field_with_wbar(domain, &a_prime, setup.weight_fft());
         let wbar_b = convolve_field_with_wbar(domain, &b_prime, setup.weight_fft());
 
@@ -378,7 +377,6 @@ fn validate_inputs<E: Pairing>(
         || pk.b_g2_query.len() != m
         || pk.l_query.len() != m - p
         || pk.vk.gamma_abc_g1.len() != p
-        || pk.h_query.len() != domain.size()
         || matrices.a.len() != matrices.num_constraints
         || matrices.b.len() != matrices.num_constraints
         || matrices
